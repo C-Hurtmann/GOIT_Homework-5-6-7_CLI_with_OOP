@@ -1,4 +1,5 @@
 from collections import UserDict
+from itertools import zip_longest
 
 phone_book = {}
 
@@ -9,10 +10,12 @@ class PhoneBook(UserDict):
     def __getitem__(self, key):
         return self.data[key]
     
-    def get_phone(self, name):
-        if not phone_book_object.get(name):
+    def get_data(self, name, data = 'phone'):
+        try:
+            return phone_book_object[name][data]
+        except KeyError:
             return 'No such name in you phone book'
-        return phone_book_object.get(name).get('phone')
+        
     
     def get_email(self, name):
         if not phone_book_object.get(name):
@@ -20,19 +23,23 @@ class PhoneBook(UserDict):
         return phone_book_object.get(name).get('email')
     
     def show_all(self):
-        result_table = ['Here is your phone book:']
+        result_table = ['Here is your phone book:\n', 
+                        '{:^10}|{:^15}|{:^10}'.format('name', 'phone', 'email'),
+                        '=' * 40]
         for name, values in phone_book_object.items():
-            for k, v in values.items():
-                result_table.append(f'{name:<10}|{k:^10}|{v:^10}')
-        return result_table
+            result_table.extend(['{:10}|{:15}|{:10}'.format(name, '', ''), '-' * 40])
+            contact_zip = zip_longest(values['phone'], values['email'], fillvalue='')
+            contact_data = '\n'.join('{:^10}|{:<15}|{:^10}'.format('', i, j) for i, j in contact_zip)
+            result_table.append(contact_data)
+        return '\n'.join(result_table)
     
 phone_book_object = PhoneBook()
 
 class Record:
     def __init__(self, name, phone = None, email = None):
         self.name = Name(name).view()
-        self.phone = Phone(phone).view()
-        self.email = Email(email).view()
+        self.phone = [Phone(phone).view()] if phone else []
+        self.email = [Email(email).view()] if email else []
     
     def add(self):
         """Recive name and phone. If it's a new name in your phone book, save them"""
@@ -45,10 +52,7 @@ class Record:
         new_values = {}
         for dct in [phone_book_object[name], values]:
             for k, v in dct.items():
-                if isinstance(v, list):
-                    new_values.setdefault(k, []).extend(v)
-                    continue
-                new_values.setdefault(k, []).append(v)
+                new_values.setdefault(k, []).extend(v if isinstance(v, list) else [v])
         phone_book_object[name] = new_values
         return f'{values.values()} has been saved for {name}'
     
@@ -132,9 +136,8 @@ def show_all() -> str:
 if __name__ == '__main__':
     Record('Ben', '+308453').add()
     Record('Ben', '+3434', 'con@gmail.com').add()
-    Record('Ben', '+3084554654983').add()
+    Record('Ben', '+380992968789').add()
     Record('Alex', '+308453').add()
     Record('Alex', '+65654+84').change()
-    print(phone_book_object)
-    # print(phone_book_object.get_phone('Alex'))
+    print(phone_book_object.get_data('Alex'))
     print(phone_book_object.show_all())
