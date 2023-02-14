@@ -4,24 +4,12 @@ import re
 
 
 class AddressBook(UserDict):
-    def __init__(self):
-        super().__init__(self)
-        self.counter = 0
-    
-    def __iter__(self):
-        return self
-       
-    def __next__(self):
-        page = [i for i in self.data.keys()]
-        if self.counter < len(page):
-            result = self.data[page[self.counter]]
-            self.counter += 1
-            return result
-        raise StopIteration
-    
-
     def iterator(self, page_length):
-        return [j for i, j in enumerate(self) if i < page_length]
+        for i, v in enumerate(self.values()):
+            if i < page_length:
+                yield '{:15}|{:15}|'.format(str(v.name), str(v.birthday)) + f'{v.phones}'
+        else:
+            yield '-' * 60
 
     
     def add_record(self, record):
@@ -126,5 +114,8 @@ if __name__ == '__main__':
     assert ab['Bill'].phones[0].value == '+380992968789'
     assert Phone('+380(99) 296 - 87 - 89').value == '+380992968789'
     assert Phone('992968789').value == '+380992968789'
-    print(ab.iterator(4))
-    print(ab.iterator(2))
+    for i in ab.iterator(2):
+        print(i)
+    
+    for j in ab.iterator(5):
+        print(j)
