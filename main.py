@@ -4,8 +4,29 @@ import re
 
 
 class AddressBook(UserDict):
+    def __init__(self):
+        super().__init__(self)
+        self.counter = 0
+    
+    def __iter__(self):
+        return self
+       
+    def __next__(self):
+        page = [i for i in self.data.keys()]
+        if self.counter < len(page):
+            result = self.data[page[self.counter]]
+            self.counter += 1
+            return result
+        raise StopIteration
+    
+
+    def iterator(self, page_length):
+        return [j for i, j in enumerate(self) if i < page_length]
+
+    
     def add_record(self, record):
         self.data[record.name.value] = record
+    
     
 class Record:
     def __init__(self, name, phones = None, birthday = None):
@@ -14,7 +35,7 @@ class Record:
         self.birthday = birthday
         
     def __repr__(self):
-        return '{:}|{:}'.format(self.birthday, self.phones)
+        return f'{self.name} | {self.birthday} | {self.phones}'
     
     def days_to_birthday(self):
         try:
@@ -30,7 +51,7 @@ class Field:
         self.value = value
         
     def __repr__(self):
-        return f'{self.value}'
+        return f'{self.value}'  
 
 class Name(Field):
     pass
@@ -42,7 +63,7 @@ class Phone(Field):
     
     @value.setter
     def value(self, value):
-        value = re.sub(r'[\-\(\)\+ ]', '', value)
+        value = re.sub(r'[\-\(\)\+ ]', '', value) # delete all the most common signs in phone record 
         if len(value) == 12:
             value = '+' + value
         elif len(value) == 10:
@@ -87,14 +108,17 @@ if __name__ == '__main__':
     name2 = Name('Ben')
     name3 = Name('Constantine')
     phone = Phone('+380(99) 296 - 87 - 89')
-    phone2 = Phone('9502560809')
+    phone2 = Phone('992968788')
     birthday = Birthday('29.03.1995')
-    rec = Record(name, phone, birthday)
-    rec2 = Record(name2, phone, birthday)
-    print(rec.days_to_birthday())
+    birthday2 = Birthday('30.09.2005')
+    rec = Record(name, [phone, phone2], birthday)
+    rec2 = Record(name2, phone, birthday2)
+    rec3 = Record(name3, phone)
+    #print(rec.days_to_birthday())
     ab = AddressBook()
     ab.add_record(rec)
     ab.add_record(rec2)
+    ab.add_record(rec3)
     assert isinstance(ab['Bill'], Record)
     assert isinstance(ab['Bill'].name, Name)
     assert isinstance(ab['Bill'].phones, list)
@@ -102,3 +126,5 @@ if __name__ == '__main__':
     assert ab['Bill'].phones[0].value == '+380992968789'
     assert Phone('+380(99) 296 - 87 - 89').value == '+380992968789'
     assert Phone('992968789').value == '+380992968789'
+    print(ab.iterator(4))
+    print(ab.iterator(2))
