@@ -7,24 +7,24 @@ class AddressBook(UserDict):
     def iterator(self, page_length):
         for i, v in enumerate(self.values()):
             if i < page_length:
-                yield '{:15}|{:15}|'.format(str(v.name), str(v.birthday)) + f'{v.phones}'
+                yield '{:15}|{:15}|'.format(str(v.name), str(v.birthday))
+                + f'{v.phones}'
         else:
             yield '-' * 60
 
-    
     def add_record(self, record):
         self.data[record.name.value] = record
-    
-    
+
+
 class Record:
-    def __init__(self, name, phones = None, birthday = None):
+    def __init__(self, name, phones=None, birthday=None):
         self.name = name
         self.phones = phones if isinstance(phones, list) else [phones]
         self.birthday = birthday
-        
+
     def __repr__(self):
         return f'{self.name} | {self.birthday} | {self.phones}'
-    
+
     def days_to_birthday(self):
         try:
             birthday_date = self.birthday.value.replace(year=datetime.now().year)
@@ -33,22 +33,25 @@ class Record:
         except AttributeError:
             return f'{self.name} has no birthday set'
 
+
 class Field:
     def __init__(self, value):
         self.__value = None
         self.value = value
-        
+
     def __repr__(self):
-        return f'{self.value}'  
+        return f'{self.value}'
+
 
 class Name(Field):
     pass
 
+
 class Phone(Field):
-    @property    
+    @property
     def value(self):
         return self.__value
-    
+
     @value.setter
     def value(self, value):
         value = re.sub(r'[\-\(\)\+ ]', '', value) # delete all the most common signs in phone record 
@@ -62,12 +65,12 @@ class Phone(Field):
             raise ValueError('Phone is not valid')
         self.__value = value
 
-            
+
 class Birthday(Field):
     @property
     def value(self):
         return self.__value
-    
+
     @value.setter
     def value(self, value):
         if isinstance(value, str):
@@ -84,7 +87,7 @@ class Birthday(Field):
                 self.__value = temp_date
         elif isinstance(value, datetime):
             self.__value = value
-    
+
     def __repr__(self):
         if self.value:
             return self.value.strftime('%d %B')
@@ -102,7 +105,7 @@ if __name__ == '__main__':
     rec = Record(name, [phone, phone2], birthday)
     rec2 = Record(name2, phone, birthday2)
     rec3 = Record(name3, phone)
-    #print(rec.days_to_birthday())
+    print(rec.days_to_birthday())
     ab = AddressBook()
     ab.add_record(rec)
     ab.add_record(rec2)
@@ -116,6 +119,5 @@ if __name__ == '__main__':
     assert Phone('992968789').value == '+380992968789'
     for i in ab.iterator(2):
         print(i)
-    
     for j in ab.iterator(5):
         print(j)
