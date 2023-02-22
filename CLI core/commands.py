@@ -25,16 +25,39 @@ class Record:
 
     def __init__(self, name, phones=None, birthday=None):
         self.name = name
-        self.phones = []
-        if isinstance(phones, Phone):
-            self.phones.append(phones)
-        elif isinstance(phones, list):
-            self.phones.extend(phones)
-        self.phones = list(set(self.phones))
-        self.birthday = birthday
+        if birthday:
+            self.__birthday = None
+            self.birthday = birthday
+            
+        if phones:
+            self.__phones = []
+            self.phones = []
+            if isinstance(phones, Phone):
+                self.phones.append(phones)
+            elif isinstance(phones, list):
+                self.phones.extend(phones)
+            self.phones = list(set(self.phones))
+
+    @property
+    def birthday(self):
+        return self.__birthday
+    
+    @birthday.setter
+    def birthday(self, birthday):
+        if birthday:
+           self.__birthday = birthday
+           
+    @property
+    def phones(self):
+        return self.__phones
+    
+    @phones.setter
+    def phones(self, phones):
+        self.__phones.extend(phones)
+        self.__phones = list(set(self.__phones))
 
     def __repr__(self):
-        return f'{self.birthday} | {self.phones}'
+        return f'{self.__birthday} | {self.phones}'
 
     def days_to_birthday(self):
         try:
@@ -44,8 +67,12 @@ class Record:
         except AttributeError:
             return f'{self.name} has no birthday set'
         
-    def change_(self, old_field, new_field):
-        pass
+    def change_field(self, old_field, new_field):
+        phone_values = [i.value for i in self.phones]
+        print(phone_values)
+        for i in old_field:
+            self.phones.pop(phone_values.index(i.value))
+        self.phones.extend(new_field)
 
 
 class Field:
@@ -110,7 +137,7 @@ class Birthday(Field):
 
 if __name__ == '__main__':
     name = Name('Bill')
-    name2 = Name('Ben')
+    name2 = Name('Bill')
     name3 = Name('Constantine')
     phone = Phone('+380(99) 296 - 87 - 89')
     phone2 = Phone('(95) 552 21 00')
@@ -126,7 +153,8 @@ if __name__ == '__main__':
     assert isinstance(ab['Bill'], Record)
     assert isinstance(ab['Bill'].name, Name)
     assert isinstance(ab['Bill'].phones, list)
-    #assert isinstance(ab['Bill'].phones[0], Phone)
+    assert isinstance(ab['Bill'].phones[0], Phone)
     ab1 = AddressBook()
-    for i in ab.iterator(5):
-        print(i)
+    rec3 = Record(name=Name('Bill')).change_field(Phone('+380955522100'), Phone('+380992968789'))
+    rec2.birthday = None
+    print(rec3)

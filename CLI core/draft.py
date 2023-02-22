@@ -1,19 +1,22 @@
+from chatterbot import ChatBot
+from chatterbot.trainers import ListTrainer
 
-class Record:
-    __instances = {}
-    phone = []
-    def __new__(cls, *args):
-        if args[0] not in cls.__instances:
-            cls.__instances[args[0]] = super().__new__(cls)
-        return cls.__instances[args[0]]
-    
-    def __init__(self, name, phone=None):
-        self.name = name
-        if phone:
-            self.phone.append(phone)
 
-x = Record('Bob', '+6568411')
-y = Record("Bob")
+chatbot = ChatBot("Ron Obvious")
 
-print(x == y, x is y)
-print(x.phone)
+conversation = [
+    "Hello",
+    "Hi there!",
+    "How are you doing?",
+    "I'm doing great.",
+    "That is good to hear",
+    "Thank you.",
+    "You're welcome."
+]
+
+trainer = ListTrainer(chatbot)
+
+trainer.train(conversation)
+
+response = chatbot.get_response("Good morning!")
+print(response)
