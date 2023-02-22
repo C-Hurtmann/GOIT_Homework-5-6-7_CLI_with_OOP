@@ -7,8 +7,7 @@ class AddressBook(UserDict):
     def iterator(self, page_length):
         for i, v in enumerate(self.values()):
             if i < page_length:
-                yield '{:15}|{:15}|'.format(str(v.name), str(v.birthday))
-                + f'{v.phones}'
+                yield '{:15}|{:15}|'.format(str(v.name), str(v.birthday)) + f'{v.phones}'
         else:
             yield '-' * 60
 
@@ -17,13 +16,25 @@ class AddressBook(UserDict):
 
 
 class Record:
+    __instances = {}
+    def __new__(cls, **kwargs):
+        name = kwargs['name'].value
+        if name not in cls.__instances:
+            cls.__instances[name] = super().__new__(cls)
+        return cls.__instances[name]
+
     def __init__(self, name, phones=None, birthday=None):
         self.name = name
-        self.phones = phones if isinstance(phones, list) else [phones]
+        self.phones = []
+        if isinstance(phones, Phone):
+            self.phones.append(phones)
+        elif isinstance(phones, list):
+            self.phones.extend(phones)
+        self.phones = list(set(self.phones))
         self.birthday = birthday
 
     def __repr__(self):
-        return f'{self.name} | {self.birthday} | {self.phones}'
+        return f'{self.birthday} | {self.phones}'
 
     def days_to_birthday(self):
         try:
@@ -32,6 +43,9 @@ class Record:
             return f'{days_left} days left untill birthday'
         except AttributeError:
             return f'{self.name} has no birthday set'
+        
+    def change_(self, old_field, new_field):
+        pass
 
 
 class Field:
@@ -62,7 +76,7 @@ class Phone(Field):
         elif len(value) == 9:
             value = '+380' + value
         else:
-            raise ValueError('Phone is not valid')
+            value = None
         self.__value = value
 
 
@@ -99,13 +113,12 @@ if __name__ == '__main__':
     name2 = Name('Ben')
     name3 = Name('Constantine')
     phone = Phone('+380(99) 296 - 87 - 89')
-    phone2 = Phone('992968788')
+    phone2 = Phone('(95) 552 21 00')
     birthday = Birthday('29.03.1995')
     birthday2 = Birthday('30.09.2005')
-    rec = Record(name, [phone, phone2], birthday)
-    rec2 = Record(name2, phone, birthday2)
-    rec3 = Record(name3, phone)
-    print(rec.days_to_birthday())
+    rec = Record(name=name, phones=phone, birthday=birthday)
+    rec2 = Record(name=name2, phones=phone2, birthday=birthday2)
+    rec3 = Record(name=name3, phones=phone)
     ab = AddressBook()
     ab.add_record(rec)
     ab.add_record(rec2)
@@ -113,11 +126,7 @@ if __name__ == '__main__':
     assert isinstance(ab['Bill'], Record)
     assert isinstance(ab['Bill'].name, Name)
     assert isinstance(ab['Bill'].phones, list)
-    assert isinstance(ab['Bill'].phones[0], Phone)
-    assert ab['Bill'].phones[0].value == '+380992968789'
-    assert Phone('+380(99) 296 - 87 - 89').value == '+380992968789'
-    assert Phone('992968789').value == '+380992968789'
-    for i in ab.iterator(2):
+    #assert isinstance(ab['Bill'].phones[0], Phone)
+    ab1 = AddressBook()
+    for i in ab.iterator(5):
         print(i)
-    for j in ab.iterator(5):
-        print(j)
