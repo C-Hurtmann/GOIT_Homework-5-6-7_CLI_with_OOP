@@ -21,6 +21,10 @@ class Handler:
     def change(self, request):
         command = request.create_command()[1]
         Record(name=command.pop('name')).change_field(**command)
+        
+    def get_birthday(self, request):
+        command = request.create_command()[1]
+        print(Record(name=command['name']).days_to_birthday())
 
 class Request:
     def __init__(self, request: str):
@@ -39,7 +43,7 @@ class Request:
                     'phones': phones})
             
         elif command == 'change':
-            name = Name(self.get_name())
+            name = self.get_name()
             separator = self._request.find('to')
             first_half_request = self._request[:separator]
             second_half_request = self._request[separator:]
@@ -48,6 +52,10 @@ class Request:
             return (command, {'name': name,
                               'old_field': old_field,
                               'new_field': new_field})
+        
+        elif command == 'birthday':
+            name = self.get_name()
+            return (command, {'name': name})
     
             
     def get_command(self):
@@ -72,9 +80,10 @@ class Request:
         if birthday:
             return Birthday(birthday.group())
     
-test_req = Request('ADD Constantine  +3809894989, 6548941351, 135-2568-465 (23432)3423434 birthday 23/02/2023')
-test_req2 = Request('change Constantine 3809894989, 6548941351 to 0951115544')
+test_req = Request('ADD Bill  +3809894989, 6548941351, 135-2568-465 (23432)3423434 birthday 02/02/2023')
+test_req2 = Request('change Bill 3809894989, 6548941351 to 0951115544')
+test_req3 = Request('birthday Bill')
 x = Handler()
 x.add(test_req)
 x.change(test_req2)
-print(x.address_book)
+x.get_birthday(test_req3)
