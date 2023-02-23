@@ -10,9 +10,9 @@ class Handler:
                               'add': self.add,
                               'change': self.change,
                               'search': None,
-                              'show all': None,
+                              'show all': self.show_all,
                               'show': None,
-                              'birthday': None}
+                              'birthday': self.get_birthday}
 
     def add(self, request):
         command = request.create_command()[1]
@@ -25,6 +25,14 @@ class Handler:
     def get_birthday(self, request):
         command = request.create_command()[1]
         print(Record(name=command['name']).days_to_birthday())
+        
+    def show(self, request):
+        command = request.create_command()[1]
+        for i in self.address_book.iterator(command):
+            print(i)
+        
+    def show_all(self):
+        print(self.address_book)
 
 class Request:
     def __init__(self, request: str):
@@ -34,6 +42,7 @@ class Request:
         
     def create_command(self):
         command = self.get_command()
+        
         if command == 'add':
             name = self.get_name()
             birthday = self.get_birthday()
@@ -56,7 +65,13 @@ class Request:
         elif command == 'birthday':
             name = self.get_name()
             return (command, {'name': name})
-    
+        
+        elif command == 'show all':
+            return (command, )
+        
+        elif command == 'show':
+            page_length = int(re.search(r'\d+', self.__request).group())
+            return (command, {'page_length': page_length})
             
     def get_command(self):
         main_commands = self.main_commands.keys()
@@ -80,10 +95,14 @@ class Request:
         if birthday:
             return Birthday(birthday.group())
     
-test_req = Request('ADD Bill  +3809894989, 6548941351, 135-2568-465 (23432)3423434 birthday 02/02/2023')
+test_req = Request('ADD Bill  +3809894989, 6548941351, 135-2568-465 (23432)3423434 birthday 25/02/2023')
 test_req2 = Request('change Bill 3809894989, 6548941351 to 0951115544')
-test_req3 = Request('birthday Bill')
+test_req3 = Request('get birthday Bill')
+test_req4 = Request('show 5 lines')
+
 x = Handler()
 x.add(test_req)
 x.change(test_req2)
 x.get_birthday(test_req3)
+x.show(test_req4)
+x.show_all()
