@@ -1,3 +1,4 @@
+from random import choice
 import re
 
 from commands import AddressBook, Record, Name, Phone, Birthday
@@ -6,21 +7,38 @@ class Handler:
     
     def __init__(self):
         self.address_book = AddressBook()
-        self.main_commands = {'hello': None,
+        self.main_commands = {'hello': self.hello,
                               'add': self.add,
                               'change': self.change,
-                              'search': None,
+                              'search': self.search,
                               'show all': self.show_all,
-                              'show': None,
+                              'show': self.show,
                               'birthday': self.get_birthday}
+    
+    def __call__(self, request):
+        return self.main_commands[request.create_command()[0]](request)
+    
+    def hello(self, request):
+        responces = ['Hi!',
+                     'How can I help you?',
+                     'How are you?',
+                     'Always smilling ;)']
+        print(choice(responces))
 
     def add(self, request):
         command = request.create_command()[1]
         self.address_book.add_record(Record(**command))
+        print('Line has been added')
         
     def change(self, request):
         command = request.create_command()[1]
         Record(name=command.pop('name')).change_field(**command)
+        print('Line has been changed')
+        
+    def search(self, request):
+        command = request.create_command()[1]
+        print("Here what I've found")
+        print(self.address_book.search(command))
         
     def get_birthday(self, request):
         command = request.create_command()[1]
@@ -48,8 +66,8 @@ class Request:
             birthday = self.get_birthday()
             phones = self.get_phone(self._request)
             return (command, {'name': name, 
-                    'birthday': birthday, 
-                    'phones': phones})
+                              'birthday': birthday, 
+                              'phones': phones})
             
         elif command == 'change':
             name = self.get_name()
@@ -61,7 +79,11 @@ class Request:
             return (command, {'name': name,
                               'old_field': old_field,
                               'new_field': new_field})
-        
+            
+        elif command == 'search':
+            search = self._request
+            return (command, {'search': search})
+            
         elif command == 'birthday':
             name = self.get_name()
             return (command, {'name': name})
@@ -70,8 +92,11 @@ class Request:
             return (command, )
         
         elif command == 'show':
-            page_length = int(re.search(r'\d+', self.__request).group())
-            return (command, {'page_length': page_length})
+            page_length = re.search(r'\d+', self._request).group()
+            return (command, int(page_length))
+        
+        elif command == 'hello':
+            return (command, )
             
     def get_command(self):
         main_commands = self.main_commands.keys()
@@ -94,15 +119,18 @@ class Request:
         birthday = re.search(r'\d{,2}[/.-]\d{,2}[/.-]\d{,4}', self.request)
         if birthday:
             return Birthday(birthday.group())
-    
-test_req = Request('ADD Bill  +3809894989, 6548941351, 135-2568-465 (23432)3423434 birthday 25/02/2023')
-test_req2 = Request('change Bill 3809894989, 6548941351 to 0951115544')
-test_req3 = Request('get birthday Bill')
-test_req4 = Request('show 5 lines')
 
-x = Handler()
-x.add(test_req)
-x.change(test_req2)
-x.get_birthday(test_req3)
-x.show(test_req4)
-x.show_all()
+
+if __name__ == '__main__':    
+    test_req = Request('ADD Bill  +3809894989, 6548941351, 135-2568-465 (23432)3423434 birthday 25/02/2023')
+    test_req2 = Request('change Bill 3809894989, 6548941351 to 0951115544')
+    test_req3 = Request('get birthday Bill')
+    test_req4 = Request('show 5 lines')
+
+    x = Handler()
+    x.add(test_req)
+    x.change(test_req2)
+    x.get_birthday(test_req3)
+    #x.show(test_req4)
+    # x.show_all()
+    Handler()(test_req4)

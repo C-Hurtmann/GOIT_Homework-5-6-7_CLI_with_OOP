@@ -5,10 +5,12 @@ import re
 
 class AddressBook(UserDict):
     def __str__(self):
-        table_header = '{:^15}|{:^15}|{:^15}\n'.format('Name', 'Birthday', 'Phones') + '*' * 50 
         lines_qty = len(self.data.keys())
         table = '\n'.join(self.iterator(lines_qty))
-        return table_header + '\n' + table
+        return self.get_header() + '\n' + table
+    
+    def get_header(self):
+        return '{:^15}|{:^15}|{:^15}\n'.format('Name', 'Birthday', 'Phones') + '=' * 50
     
     def iterator(self, page_length):
         for i, v in enumerate(self.values()):
@@ -20,11 +22,15 @@ class AddressBook(UserDict):
                     birthday = ''
                 phones = ', '.join(list(map(str, v.phones)))
                 yield '{:15}|{:15}|'.format(name, birthday) + f'{phones}'
-        else:
-            yield '-' * 60
 
     def add_record(self, record):
         self.data[record.name.value] = record
+        
+    def search(self, search):
+        lines_qty = len(self.data.keys())
+        table = list(self.iterator(lines_qty))       
+        match = [i for i in table if i.find(search) != -1]
+        return '\n'.join([self.get_header()] + match)
 
 
 class Record:
@@ -156,5 +162,6 @@ if __name__ == '__main__':
     assert isinstance(ab['Bill'].phones[0], Phone)
     ab1 = AddressBook()
     #Record(name=Name('Bill')).change_field([Phone('+380955522100')], [Phone('+380992968789')])
-    print(rec2)
-    print(ab)
+    #print(ab)
+    
+    print(ab.search('March'))
