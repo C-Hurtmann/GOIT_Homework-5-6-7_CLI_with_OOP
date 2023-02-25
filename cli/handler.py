@@ -14,8 +14,8 @@ class Handler:
                               'show all': self.show_all,
                               'show': self.show,
                               'birthday': self.get_birthday}
-    
-    def __call__(self, request):
+
+    def run(self, request):
         return self.main_commands[request.create_command()[0]](request)
     
     def hello(self, request):
@@ -33,7 +33,6 @@ class Handler:
     def change(self, request):
         command = request.create_command()[1]
         Record(name=command.pop('name')).change_field(**command)
-        print('Line has been changed')
         
     def search(self, request):
         command = request.create_command()[1]
@@ -46,10 +45,11 @@ class Handler:
         
     def show(self, request):
         command = request.create_command()[1]
+        print("Here what I've got")
         for i in self.address_book.iterator(command):
             print(i)
         
-    def show_all(self):
+    def show_all(self, request):
         print(self.address_book)
 
 class Request:
@@ -131,6 +131,6 @@ if __name__ == '__main__':
     x.add(test_req)
     x.change(test_req2)
     x.get_birthday(test_req3)
-    #x.show(test_req4)
+    x.show(test_req4)
     # x.show_all()
-    Handler()(test_req4)
+    #Handler()(test_req4)

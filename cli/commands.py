@@ -20,7 +20,10 @@ class AddressBook(UserDict):
                     birthday = str(v.birthday)
                 except AttributeError:
                     birthday = ''
-                phones = ', '.join(list(map(str, v.phones)))
+                try:
+                    phones = ', '.join(list(map(str, v.phones)))
+                except AttributeError:
+                    phones = ''
                 yield '{:15}|{:15}|'.format(name, birthday) + f'{phones}'
 
     def add_record(self, record):
@@ -53,6 +56,10 @@ class Record:
             elif isinstance(phones, list):
                 self.phones.extend(phones)
             self.phones = list(set(self.phones))
+    
+    #@property
+    #def birthday(self):
+        
 
     def __repr__(self):
         try:
