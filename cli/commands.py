@@ -44,22 +44,37 @@ class Record:
             cls.__instances[name] = super().__new__(cls)
         return cls.__instances[name]
 
-    def __init__(self, name, phones=None, birthday=None):
+    def __init__(self, name, phones=[], birthday=None):
         self.name = name
         if birthday:
+            self.__birthday = None
             self.birthday = birthday
-            
+               
         if phones:
-            self.phones = []
-            if isinstance(phones, Phone):
-                self.phones.append(phones)
-            elif isinstance(phones, list):
-                self.phones.extend(phones)
-            self.phones = list(set(self.phones))
+            try:
+                self.__phones = self.__phones
+            except AttributeError:
+                self.__phones = []
+                
+            self.phones = phones
+
+    @property
+    def birthday(self):
+        return self.__birthday
     
-    #@property
-    #def birthday(self):
-        
+    @birthday.setter
+    def birthday(self, birthday):
+        if birthday:
+            self.__birthday = birthday
+            
+    @property
+    def phones(self):
+        return self.__phones
+    
+    @phones.setter
+    def phones(self, phones):
+        if phones:
+            self.__phones += phones
 
     def __repr__(self):
         try:
@@ -152,16 +167,16 @@ if __name__ == '__main__':
     name = Name('Bill')
     name2 = Name('Bob')
     name3 = Name('Constantine')
-    phone = Phone('+380(99) 296 - 87 - 89')
-    phone2 = Phone('(95) 552 21 00')
+    phone = [Phone('+380(99)296-87-89')]
+    phone2 = [Phone('(95) 552 21 00'), Phone('0995552211')]
     birthday = Birthday('29.03.1995')
     birthday2 = Birthday('30.09.2005')
     rec = Record(name=name, phones=phone, birthday=birthday)
     rec2 = Record(name=name2, phones=phone2, birthday=birthday2)
-    rec3 = Record(name=name3, phones=phone)
+    rec3 = Record(name=name, phones=phone2)
     ab = AddressBook()
     ab.add_record(rec)
-    ab.add_record(rec2)
+    #ab.add_record(rec2)
     ab.add_record(rec3)
     assert isinstance(ab['Bill'], Record)
     assert isinstance(ab['Bill'].name, Name)
@@ -169,6 +184,5 @@ if __name__ == '__main__':
     assert isinstance(ab['Bill'].phones[0], Phone)
     ab1 = AddressBook()
     #Record(name=Name('Bill')).change_field([Phone('+380955522100')], [Phone('+380992968789')])
-    #print(ab)
+    print(ab)
     
-    print(ab.search('March'))
