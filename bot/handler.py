@@ -22,7 +22,7 @@ class Handler:
         responces = ['Hi!',
                      'How can I help you?',
                      'How are you?',
-                     'Always smilling ;)']
+                     ]
         print(choice(responces))
 
     def add(self, request):
@@ -37,7 +37,7 @@ class Handler:
     def search(self, request):
         command = request.create_command()[1]
         print("Here what I've found")
-        print(self.address_book.search(command))
+        print(self.address_book.search(**command))
         
     def get_birthday(self, request):
         command = request.create_command()[1]

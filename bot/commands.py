@@ -1,9 +1,16 @@
 from collections import UserDict
 from datetime import datetime
+import pickle
 import re
 
 
 class AddressBook(UserDict):
+    def __init__(self, filename=None):
+        super().__init__(self)
+        if filename:
+            self.data = self.read_data(filename)
+            
+    
     def __str__(self):
         lines_qty = len(self.data.keys())
         table = '\n'.join(self.iterator(lines_qty))
@@ -34,15 +41,27 @@ class AddressBook(UserDict):
         table = list(self.iterator(lines_qty))       
         match = [i for i in table if i.find(search) != -1]
         return '\n'.join([self.get_header()] + match)
+    
+    def save_data(self, filename):
+        with open(filename, 'wb') as fh:
+            pickle.dump(self.data, fh)
+    
+    def read_data(self, filename):
+        with open(filename, 'rb') as fh:
+            return pickle.load(fh)
 
 
 class Record:
     __instances = {}
     def __new__(cls, **kwargs):
-        name = kwargs['name'].value
-        if name not in cls.__instances:
-            cls.__instances[name] = super().__new__(cls)
-        return cls.__instances[name]
+        try:
+            name = kwargs['name'].value
+        except KeyError:
+            return super().__new__(cls)
+        else:
+            if name not in cls.__instances:
+                cls.__instances[name] = super().__new__(cls)
+            return cls.__instances[name]
 
     def __init__(self, name, phones=[], birthday=None):
         self.name = name
@@ -57,6 +76,13 @@ class Record:
                 self.__phones = []
                 
             self.phones = phones
+    
+    def __getstate__(self):
+        record = self.__dict__.copy()
+        if record.get('__phones'):
+            print('I')
+        return record
+        
 
     @property
     def birthday(self):
@@ -173,10 +199,10 @@ if __name__ == '__main__':
     birthday2 = Birthday('30.09.2005')
     rec = Record(name=name, phones=phone, birthday=birthday)
     rec2 = Record(name=name2, phones=phone2, birthday=birthday2)
-    rec3 = Record(name=name, phones=phone2)
+    rec3 = Record(name=name3, phones=phone2)
     ab = AddressBook()
     ab.add_record(rec)
-    #ab.add_record(rec2)
+    ab.add_record(rec2)
     ab.add_record(rec3)
     assert isinstance(ab['Bill'], Record)
     assert isinstance(ab['Bill'].name, Name)
@@ -184,5 +210,8 @@ if __name__ == '__main__':
     assert isinstance(ab['Bill'].phones[0], Phone)
     ab1 = AddressBook()
     #Record(name=Name('Bill')).change_field([Phone('+380955522100')], [Phone('+380992968789')])
-    print(ab)
-    
+    #print(ab)
+    ab.save_data('save.pkl')
+    reader = ab.read_data('save.pkl')
+    print(rec.__getstate__())
+    print(rec3.__getstate__())
