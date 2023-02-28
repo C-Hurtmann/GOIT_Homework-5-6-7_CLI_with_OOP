@@ -64,7 +64,7 @@ class Request:
     """
     def __init__(self, request: str):
         self.request = request
-        self._request = None
+        self.__request = None
         self.main_commands = Handler().main_commands
         
     def create_command(self) -> tuple[str, dict]:
@@ -74,61 +74,61 @@ class Request:
         Returns:
             tuple[str, dict]: (command name, command info dict)
         """
-        command = self.get_command()
+        command = self.__get_command()
         
         if command == 'add':
-            name = self.get_name()
-            birthday = self.get_birthday()
-            phones = self.get_phone(self._request)
+            name = self.__get_name()
+            birthday = self.__get_birthday()
+            phones = self.__get_phone(self.__request)
             return (command, {'name': name, 
                               'birthday': birthday, 
                               'phones': phones})
             
         elif command == 'change':
-            name = self.get_name()
-            separator = self._request.find('to')
-            first_half_request = self._request[:separator]
-            second_half_request = self._request[separator:]
-            old_field = self.get_phone(first_half_request)
-            new_field = self.get_phone(second_half_request)
+            name = self.__get_name()
+            separator = self.__request.find('to')
+            first_half_request = self.__request[:separator]
+            second_half_request = self.__request[separator:]
+            old_field = self.__get_phone(first_half_request)
+            new_field = self.__get_phone(second_half_request)
             return (command, {'name': name,
                               'old_field': old_field,
                               'new_field': new_field})
             
         elif command == 'search':
-            search = self._request
+            search = self.__request
             return (command, {'search': search})
             
         elif command == 'birthday':
-            name = self.get_name()
+            name = self.__get_name()
             return (command, {'name': name})
         
         elif command in ('hello', 'show all'):
             return (command, )
         
         elif command == 'show':
-            page_length = re.search(r'\d+', self._request).group()
+            page_length = re.search(r'\d+', self.__request).group()
             return (command, int(page_length))
             
-    def get_command(self):
+    def __get_command(self):
         main_commands = self.main_commands.keys()
         for i in main_commands:
             command = re.search(fr'\b{i}\b', self.request, re.IGNORECASE)
             if command:
-                self._request = re.sub(fr'{command.group()}', '', self.request).strip()
+                self.__request = re.sub(fr'{command.group()}', '', self.request).strip()
                 return command.group().lower()
     
-    def get_name(self):
-        name = re.search(r"\b([A-Z][a-z]+)+", self._request)
+    def __get_name(self):
+        name = re.search(r"\b([A-Z][a-z]+)+", self.__request)
         return Name(name.group())
     
-    def get_phone(self, request: str):
+    def __get_phone(self, request: str):
         phones = re.findall(r'\b\+?[\(\)\-\d]+\b', request)
         if phones:
             return [Phone(i) for i in phones if Phone(i).value]
         
-    def get_birthday(self):
-        birthday = re.search(r'\d{,2}[/.-]\d{,2}[/.-]\d{,4}', self._request)
+    def __get_birthday(self):
+        birthday = re.search(r'\d{,2}[/.-]\d{,2}[/.-]\d{,4}', self.__request)
         if birthday:
             return Birthday(birthday.group())
 
