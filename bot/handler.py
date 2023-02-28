@@ -19,42 +19,42 @@ class Handler:
                               'show': self.show,
                               'birthday': self.get_birthday}
 
-    def run(self, request):
+    def run(self, request: tuple[str, dict]):
         return self.main_commands[request.create_command()[0]](request)
     
-    def hello(self, request):
+    def hello(self, request: None): # No need info for this command
         responces = ['Hi!',
                      'How can I help you?',
                      'How are you?',
                      ]
         print(choice(responces))
 
-    def add(self, request):
+    def add(self, request: dict):
         command = request.create_command()[1]
         self.address_book.add_record(Record(**command))
         print('Line has been added')
         
-    def change(self, request):
+    def change(self, request: dict):
         command = request.create_command()[1]
         record = Record(name=command.pop('name'))
         print(record.change_field(**command))
         
-    def search(self, request):
+    def search(self, request: dict):
         command = request.create_command()[1]
         print("Here what I've found")
         print(self.address_book.search(**command))
         
-    def get_birthday(self, request):
+    def get_birthday(self, request: dict):
         command = request.create_command()[1]
         print(Record(name=command['name']).days_to_birthday())
         
-    def show(self, request):
+    def show(self, request: dict):
         command = request.create_command()[1]
         print("Here what I've got")
         for i in self.address_book.iterator(command):
             print(i)
         
-    def show_all(self, request):
+    def show_all(self, request: None): # No need info for this command
         print(self.address_book)
 
 class Request:
@@ -103,15 +103,12 @@ class Request:
             name = self.get_name()
             return (command, {'name': name})
         
-        elif command == 'show all':
+        elif command in ('hello', 'show all'):
             return (command, )
         
         elif command == 'show':
             page_length = re.search(r'\d+', self._request).group()
             return (command, int(page_length))
-        
-        elif command == 'hello':
-            return (command, )
             
     def get_command(self):
         main_commands = self.main_commands.keys()
@@ -125,13 +122,13 @@ class Request:
         name = re.search(r"\b([A-Z][a-z]+)+", self._request)
         return Name(name.group())
     
-    def get_phone(self, request):
+    def get_phone(self, request: str):
         phones = re.findall(r'\b\+?[\(\)\-\d]+\b', request)
         if phones:
             return [Phone(i) for i in phones if Phone(i).value]
         
     def get_birthday(self):
-        birthday = re.search(r'\d{,2}[/.-]\d{,2}[/.-]\d{,4}', self.request)
+        birthday = re.search(r'\d{,2}[/.-]\d{,2}[/.-]\d{,4}', self._request)
         if birthday:
             return Birthday(birthday.group())
 

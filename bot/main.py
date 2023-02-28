@@ -12,4 +12,4 @@ with Autosave(Handler()) as handler:
             print('Good bye!')
             break
         handler.run(Request(user_input))
-
+        print('-' * 50)
