@@ -13,12 +13,13 @@ class AddressBook(UserDict):
     def __str__(self):
         lines_qty = len(self.data.keys())
         table = '\n'.join(self.iterator(lines_qty))
-        return self.get_header() + '\n' + table
+        return '\n' + table
 
     def get_header(self):
         return '{:^15}|{:^15}|{:^15}\n'.format('Name', 'Birthday', 'Phones') + '=' * 50
 
     def iterator(self, page_length):
+        yield self.get_header()
         for i, v in enumerate(self.values()):
             if i < page_length:
                 name = str(v.name)
