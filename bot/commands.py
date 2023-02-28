@@ -9,17 +9,15 @@ class AddressBook(UserDict):
         super().__init__(self)
         if filename:
             self.data = self.read_data(filename)
-            
-    
+
     def __str__(self):
         lines_qty = len(self.data.keys())
         table = '\n'.join(self.iterator(lines_qty))
         return self.get_header() + '\n' + table
-    
-    
+
     def get_header(self):
         return '{:^15}|{:^15}|{:^15}\n'.format('Name', 'Birthday', 'Phones') + '=' * 50
-    
+
     def iterator(self, page_length):
         for i, v in enumerate(self.values()):
             if i < page_length:
@@ -36,17 +34,17 @@ class AddressBook(UserDict):
 
     def add_record(self, record):
         self.data[record.name.value] = record
-        
+
     def search(self, search):
         lines_qty = len(self.data.keys())
-        table = list(self.iterator(lines_qty))       
+        table = list(self.iterator(lines_qty))
         match = [i for i in table if i.find(search) != -1]
         return '\n'.join([self.get_header()] + match)
-    
+
     def save_data(self, filename):
         with open(filename, 'wb') as fh:
             pickle.dump(self.data, fh)
-    
+
     def read_data(self, filename):
         with open(filename, 'rb') as fh:
             reader = pickle.load(fh)
@@ -56,6 +54,7 @@ class AddressBook(UserDict):
 
 class Record:
     _instances = {}
+
     def __new__(cls, **kwargs):
         try:
             name = kwargs['name'].value
@@ -71,28 +70,28 @@ class Record:
         if birthday:
             self.__birthday = None
             self.birthday = birthday
-               
+
         if phones:
             try:
                 self.__phones = self.__phones
             except AttributeError:
                 self.__phones = []
-                
+
             self.phones = phones
 
     @property
     def birthday(self):
         return self.__birthday
-    
+
     @birthday.setter
     def birthday(self, birthday):
         if birthday:
             self.__birthday = birthday
-            
+
     @property
     def phones(self):
         return self.__phones
-    
+
     @phones.setter
     def phones(self, phones):
         if phones:
@@ -115,14 +114,13 @@ class Record:
         days_left = abs((birthday_date - now).days + 1)
         return f'{days_left} days left untill birthday'
 
-        
     def change_field(self, old_field, new_field):
         phone_values = [i.value for i in self.phones]
         for i in old_field:
-            
+
             self.phones.pop(phone_values.index(i.value))
         self.phones.extend(new_field)
-        print(f'Phone {old_field} have been changed to {new_field}')
+        return f'Phone {old_field} have been changed to {new_field}'
 
 
 class Field:
@@ -194,18 +192,18 @@ if __name__ == '__main__':
     phone3 = [Phone('0655221133')]
     birthday = Birthday('29.03.1995')
     birthday2 = Birthday('30.09.2005')
-    #rec = Record(name=name, phones=phone, birthday=birthday)
-    #rec2 = Record(name=name2, phones=phone2, birthday=birthday2)
-    #rec3 = Record(name=name3, birthday=birthday, phones=phone3)
+    rec = Record(name=name, phones=phone, birthday=birthday)
+    rec2 = Record(name=name2, phones=phone2, birthday=birthday2)
+    rec3 = Record(name=name3, birthday=birthday, phones=phone3)
     ab = AddressBook()
-    #ab.add_record(rec)
-    #ab.add_record(rec2)
-    #ab.add_record(rec3)
-    #assert isinstance(ab['Bill'], Record)
-    #assert isinstance(ab['Bill'].name, Name)
-    #assert isinstance(ab['Bill'].phones, list)
-    #assert isinstance(ab['Bill'].phones[0], Phone)
-    #ab.save_data('save.pkl')
+    ab.add_record(rec)
+    ab.add_record(rec2)
+    ab.add_record(rec3)
+    assert isinstance(ab['Bill'], Record)
+    assert isinstance(ab['Bill'].name, Name)
+    assert isinstance(ab['Bill'].phones, list)
+    assert isinstance(ab['Bill'].phones[0], Phone)
+    ab.save_data('save.pkl')
     reader = ab.read_data('save.pkl')
     print(reader)
     print(Record._instances == reader)

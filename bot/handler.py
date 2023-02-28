@@ -32,7 +32,8 @@ class Handler:
         
     def change(self, request):
         command = request.create_command()[1]
-        Record(name=command.pop('name')).change_field(**command)
+        record = Record(name=command.pop('name'))
+        print(record.change_field(**command))
         
     def search(self, request):
         command = request.create_command()[1]
@@ -132,5 +133,3 @@ if __name__ == '__main__':
     x.change(test_req2)
     x.get_birthday(test_req3)
     x.show(test_req4)
-    # x.show_all()
-    #Handler()(test_req4)
