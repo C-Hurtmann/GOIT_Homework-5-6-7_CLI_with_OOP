@@ -5,6 +5,7 @@ import re
 
 
 class AddressBook(UserDict):
+    
     def __init__(self, filename=None):
         super().__init__(self)
         if filename:
@@ -12,8 +13,7 @@ class AddressBook(UserDict):
 
     def __str__(self):
         lines_qty = len(self.data.keys())
-        table = '\n'.join(self.iterator(lines_qty))
-        return '\n' + table
+        return '\n'.join(self.iterator(lines_qty))
 
     def get_header(self):
         return '{:^15}|{:^15}|{:^15}\n'.format('Name', 'Birthday', 'Phones') + '=' * 50
@@ -54,6 +54,12 @@ class AddressBook(UserDict):
 
 
 class Record:
+    """
+    This is a value of Address Book
+    Based on singleton pattern so no need to change address book value directly.
+    Can be called many times with adding some info. Previous filled info will be saved
+    
+    """
     _instances = {}
 
     def __new__(cls, **kwargs):
@@ -105,6 +111,9 @@ class Record:
             return 'None'
 
     def days_to_birthday(self):
+        """
+        Counts days to birthday for the Record if it has birthday field
+        """
         try:
             birthday_date = self.birthday.value.replace(year=datetime.now().year)
         except AttributeError:
@@ -115,7 +124,14 @@ class Record:
         days_left = abs((birthday_date - now).days + 1)
         return f'{days_left} days left untill birthday'
 
-    def change_field(self, old_field, new_field):
+    def change_field(self, old_field: list, new_field: list):
+        """
+        Changes phone numbers in the Record
+
+        Args:
+            old_field (list): list of excisting phones in record, this func should remove
+            new_field (list): list of phones, this func should add instead of old_field
+        """
         phone_values = [i.value for i in self.phones]
         for i in old_field:
 
@@ -143,8 +159,8 @@ class Phone(Field):
         return self.__value
 
     @value.setter
-    def value(self, value):
-        value = re.sub(r'[\-\(\)\+ ]', '', value) # delete all the most common signs in phone record 
+    def value(self, value: str):
+        value = re.sub(r'[\-\(\)\+ ]', '', value)  # delete all the most common signs in phone record 
         if len(value) == 12:
             value = '+' + value
         elif len(value) == 10:
@@ -162,21 +178,18 @@ class Birthday(Field):
         return self.__value
 
     @value.setter
-    def value(self, value):
-        if isinstance(value, str):
-            temp_date = list(map(int, re.findall(r'\d+', value)))
-            temp_date = temp_date if len(str(temp_date[0])) == 4 else list(reversed(temp_date))
-            try:
-                if temp_date[0] > datetime.now().year:
-                    raise ValueError
-                temp_date = datetime(*temp_date)
-            except ValueError:
-                print('Date is not valid')
-                self.__value = None
-            else:
-                self.__value = temp_date
-        elif isinstance(value, datetime):
-            self.__value = value
+    def value(self, value: str):
+        temp_date = list(map(int, re.findall(r'\d+', value)))
+        temp_date.reverse()
+        try:
+            if temp_date[0] > datetime.now().year:
+                raise ValueError
+            temp_date = datetime(*temp_date)
+        except ValueError:
+            print('Date is not valid')
+            self.__value = None
+        else:
+            self.__value = temp_date
 
     def __repr__(self):
         if self.value:

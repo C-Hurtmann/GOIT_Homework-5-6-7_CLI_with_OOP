@@ -4,6 +4,10 @@ from commands import AddressBook
 
 
 class Autosave:
+    """
+    Reads address book from pkl file if it created
+    Writes address book in the pkl file when bot has been stopped
+    """
     def __init__(self, handler, filename='save.pkl'):
         self.handler = handler
         self.filename = Path(filename)
