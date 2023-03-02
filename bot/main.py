@@ -1,5 +1,5 @@
-from handler import Handler, Request
-from serializer import Autosave
+from bot.handler import Handler, Request
+from bot.serializer import Autosave
 
 QUIT_WORDS = ('bye', 'quit', 'good bye', 'exit')
 with Autosave(Handler()) as handler:

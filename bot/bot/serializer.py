@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from commands import AddressBook
+from bot.commands import AddressBook
 
 
 class Autosave:

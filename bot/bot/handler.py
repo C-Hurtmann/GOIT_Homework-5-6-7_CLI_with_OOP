@@ -1,7 +1,7 @@
 from random import choice
 import re
 
-from commands import AddressBook, Record, Name, Phone, Birthday
+from bot.commands import AddressBook, Record, Name, Phone, Birthday
 
 
 class Handler:
